@@ -61,8 +61,11 @@ export class TablesPage {
 
   async getTableStatus(tableNumber: string): Promise<string> {
     const row = this.tablesTableBody.locator('tr').filter({ hasText: tableNumber })
-    const statusBadge = row.locator('[class*="badge"]')
-    return await statusBadge.textContent() || ''
+    // Badge component không có class chứa "badge", tìm bằng text content trong cell chứa status
+    // Status là cột thứ 4 (sau Table number, Area, Capacity)
+    const statusCell = row.locator('td').nth(3)
+    const badgeText = await statusCell.textContent()
+    return badgeText?.trim() || ''
   }
 
   async waitForTablesToLoad() {
@@ -77,13 +80,17 @@ export class TablesPage {
 
   async clickEditTable(tableNumber: string) {
     const row = this.tablesTableBody.locator('tr').filter({ hasText: tableNumber })
-    await row.getByRole('button', { name: /Edit|Sửa/i }).first().click()
+    // Button chỉ có icon Edit, không có text. Tìm button đầu tiên trong actions cell
+    const actionsCell = row.locator('td').last()
+    await actionsCell.getByRole('button').first().click()
     await this.tableDialog.waitFor({ state: 'visible' })
   }
 
   async clickDeleteTable(tableNumber: string) {
     const row = this.tablesTableBody.locator('tr').filter({ hasText: tableNumber })
-    await row.getByRole('button', { name: /Trash|Xóa/i }).last().click()
+    // Button chỉ có icon Trash2, không có text. Tìm button thứ hai trong actions cell
+    const actionsCell = row.locator('td').last()
+    await actionsCell.getByRole('button').last().click()
   }
 
   async fillTableForm(data: {
@@ -93,6 +100,11 @@ export class TablesPage {
     status?: string
     notes?: string
   }) {
+    // Wait for area select to have options before selecting
+    await this.areaSelect.waitFor({ state: 'visible' })
+    await this.page.waitForTimeout(500) // Wait for options to load
+    // Verify at least one option (excluding the default "Chọn khu vực")
+    await this.areaSelect.locator('option').nth(1).waitFor({ state: 'attached' }).catch(() => {})
     await this.areaSelect.selectOption(data.areaId)
     await this.tableNumberInput.fill(data.tableNumber)
     if (data.capacity !== undefined) {

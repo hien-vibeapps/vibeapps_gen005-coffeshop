@@ -53,8 +53,21 @@ export class OrdersPage {
 
   async getOrderStatus(orderNumber: string): Promise<string> {
     const row = this.ordersTableBody.locator('tr').filter({ hasText: orderNumber })
-    const statusBadge = row.locator('[class*="badge"]')
-    return await statusBadge.textContent() || ''
+    // Status badge là cột thứ 5 (sau Số đơn, Bàn, Loại, Tổng tiền)
+    const statusCell = row.locator('td').nth(4)
+    const badgeText = await statusCell.textContent()
+    return badgeText?.trim() || ''
+  }
+
+  async waitForStatisticsToLoad() {
+    // Wait for statistics section to appear
+    await this.page.waitForSelector('text=Thống kê Đơn hàng', { timeout: 5000 }).catch(() => {})
+    // Wait for API call to complete
+    await this.page.waitForTimeout(2000)
+  }
+
+  async getStatisticsSection() {
+    return this.page.locator('text=Thống kê Đơn hàng').locator('..')
   }
 }
 

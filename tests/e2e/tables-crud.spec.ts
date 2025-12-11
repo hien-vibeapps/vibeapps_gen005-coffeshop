@@ -13,27 +13,35 @@ test.describe('Tables CRUD Operations', () => {
 
   test.describe('Create Table', () => {
     test('should create table with valid data', async () => {
-      // First, get an area ID
-      const areaSelect = tablesPage.page.locator('#area_id')
-      const firstOption = await areaSelect.locator('option').nth(1).getAttribute('value')
+      const tableNumber = `Table ${Date.now()}`
       
-      if (firstOption) {
-        const tableNumber = `Table ${Date.now()}`
-        
-        await tablesPage.clickAddTable()
-        await tablesPage.fillTableForm({
-          areaId: firstOption,
-          tableNumber,
-          capacity: 4,
-          status: 'available',
-          notes: 'Test table',
-        })
-        await tablesPage.submitTableForm()
-        
-        await tablesPage.waitForTablesToLoad()
-        
-        const tableNumbers = await tablesPage.getTableNumbers()
-        expect(tableNumbers).toContain(tableNumber)
+      await tablesPage.clickAddTable()
+      
+      // Wait for dialog and area select options to load
+      await tablesPage.tableDialog.waitFor({ state: 'visible' })
+      await tablesPage.areaSelect.waitFor({ state: 'visible' })
+      await tablesPage.page.waitForTimeout(500)
+      
+      // Get first available area option (skip index 0 which is "Chọn khu vực")
+      const areaSelect = tablesPage.areaSelect
+      const options = await areaSelect.locator('option').all()
+      if (options.length > 1) {
+        const firstOption = await options[1].getAttribute('value')
+        if (firstOption) {
+          await tablesPage.fillTableForm({
+            areaId: firstOption,
+            tableNumber,
+            capacity: 4,
+            status: 'available',
+            notes: 'Test table',
+          })
+          await tablesPage.submitTableForm()
+          
+          await tablesPage.waitForTablesToLoad()
+          
+          const tableNumbers = await tablesPage.getTableNumbers()
+          expect(tableNumbers).toContain(tableNumber)
+        }
       }
     })
 
@@ -50,19 +58,27 @@ test.describe('Tables CRUD Operations', () => {
     })
 
     test('should validate required fields - table number is required', async () => {
-      const areaSelect = tablesPage.page.locator('#area_id')
-      const firstOption = await areaSelect.locator('option').nth(1).getAttribute('value')
+      await tablesPage.clickAddTable()
       
-      if (firstOption) {
-        await tablesPage.clickAddTable()
-        await tablesPage.areaSelect.selectOption(firstOption)
-        await tablesPage.tableNumberInput.clear()
-        await tablesPage.submitButton.click()
-        
-        const isInvalid = await tablesPage.tableNumberInput.evaluate((el: HTMLInputElement) => {
-          return !el.validity.valid
-        })
-        expect(isInvalid).toBe(true)
+      // Wait for dialog and area select options to load
+      await tablesPage.tableDialog.waitFor({ state: 'visible' })
+      await tablesPage.areaSelect.waitFor({ state: 'visible' })
+      await tablesPage.page.waitForTimeout(500)
+      
+      const areaSelect = tablesPage.areaSelect
+      const options = await areaSelect.locator('option').all()
+      if (options.length > 1) {
+        const firstOption = await options[1].getAttribute('value')
+        if (firstOption) {
+          await tablesPage.areaSelect.selectOption(firstOption)
+          await tablesPage.tableNumberInput.clear()
+          await tablesPage.submitButton.click()
+          
+          const isInvalid = await tablesPage.tableNumberInput.evaluate((el: HTMLInputElement) => {
+            return !el.validity.valid
+          })
+          expect(isInvalid).toBe(true)
+        }
       }
     })
   })

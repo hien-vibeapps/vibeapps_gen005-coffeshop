@@ -14,7 +14,7 @@ test.describe('Reports Page', () => {
   })
 
   test('should display revenue report card', async ({ page }) => {
-    await expect(page.getByText('Báo cáo Doanh thu')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Báo cáo Doanh thu' })).toBeVisible()
     await expect(page.getByText('Xem doanh thu theo thời gian')).toBeVisible()
   })
 
@@ -54,12 +54,12 @@ test.describe('Settings Page', () => {
   })
 
   test('should display shop information card', async ({ page }) => {
-    await expect(page.getByText('Thông tin Quán')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Thông tin Quán' })).toBeVisible()
     await expect(page.getByText('Cập nhật thông tin cơ bản của quán')).toBeVisible()
   })
 
   test('should display system configuration card', async ({ page }) => {
-    await expect(page.getByText('Cấu hình Hệ thống')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Cấu hình Hệ thống' })).toBeVisible()
     await expect(page.getByText('Thiết lập các thông số hệ thống')).toBeVisible()
   })
 

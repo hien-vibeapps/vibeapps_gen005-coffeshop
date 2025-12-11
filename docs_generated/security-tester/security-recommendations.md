@@ -1,13 +1,19 @@
 # Security Recommendations - Coffee Shop Management System
 
-**Date:** 2025-12-10  
+**Date:** 2025-01-12  
 **Priority:** Immediate Action Required
 
 ---
 
 ## Executive Summary
 
-This document provides detailed security recommendations to address the 16 vulnerabilities identified in the security audit. Recommendations are prioritized by severity and impact.
+This document provides detailed security recommendations to address the **17 vulnerabilities** identified in the security audit. Recommendations are prioritized by severity and impact.
+
+**Key Findings:**
+- **51 unprotected API endpoints** - No authentication/authorization
+- **Widespread SQL injection** - Affects 7 services, 20+ endpoints
+- **No security headers** - Vulnerable to XSS, clickjacking
+- **File upload vulnerabilities** - No validation
 
 **Estimated Total Effort:** 3-4 weeks  
 **Critical Fixes:** 1-2 weeks  
@@ -187,6 +193,8 @@ This document provides detailed security recommendations to address the 16 vulne
 **Priority:** P0 - Immediate  
 **Effort:** 1-2 hours  
 **Impact:** Prevents XSS, clickjacking, MIME sniffing
+
+#### Implementation:
 
 #### Implementation:
 
@@ -569,6 +577,140 @@ This document provides detailed security recommendations to address the 16 vulne
 
 ---
 
+### REC-004: Fix File Upload Security
+
+**Priority:** P0 - Immediate  
+**Effort:** 3-4 hours  
+**Impact:** Prevents malicious file uploads and server compromise
+
+#### Implementation:
+
+1. **Install Required Packages**
+   ```bash
+   npm install multer
+   npm install --save-dev @types/multer
+   ```
+
+2. **Create File Upload Configuration**
+   ```typescript
+   // services/coffee-shop-api/src/common/config/file-upload.config.ts
+   import { diskStorage } from 'multer';
+   import { extname } from 'path';
+   import { existsSync, mkdirSync } from 'fs';
+   
+   export const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+   export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+   export const UPLOAD_DIR = './uploads/products';
+   
+   export function getFileUploadConfig() {
+     // Ensure upload directory exists
+     if (!existsSync(UPLOAD_DIR)) {
+       mkdirSync(UPLOAD_DIR, { recursive: true });
+     }
+     
+     return {
+       storage: diskStorage({
+         destination: UPLOAD_DIR,
+         filename: (req, file, cb) => {
+           // Generate unique filename to prevent conflicts and path traversal
+           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+           const ext = extname(file.originalname);
+           // Sanitize extension - only allow image extensions
+           const safeExt = ['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext.toLowerCase()) 
+             ? ext.toLowerCase() 
+             : '.jpg';
+           cb(null, `product-${uniqueSuffix}${safeExt}`);
+         },
+       }),
+       limits: {
+         fileSize: MAX_FILE_SIZE,
+       },
+       fileFilter: (req, file, cb) => {
+         // Validate MIME type
+         if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+           return cb(new Error('Invalid file type. Only images (JPEG, PNG, GIF, WebP) are allowed.'), false);
+         }
+         cb(null, true);
+       },
+     };
+   }
+   ```
+
+3. **Update Product Controller**
+   ```typescript
+   // services/coffee-shop-api/src/presentation/modules/product/product.controller.ts
+   import { FileInterceptor } from '@nestjs/platform-express';
+   import { getFileUploadConfig } from '../../../common/config/file-upload.config';
+   
+   @Post(':id/images')
+   @HttpCode(HttpStatus.CREATED)
+   @UseGuards(JwtAuthGuard) // Require authentication
+   @UseInterceptors(FileInterceptor('image', getFileUploadConfig()))
+   @ApiConsumes('multipart/form-data')
+   @ApiOperation({ summary: 'Upload product image' })
+   @ApiParam({ name: 'id', type: 'string' })
+   async uploadProductImage(
+     @Param('id') productId: string,
+     @UploadedFile() file: Express.Multer.File,
+     @Body() body: { display_order?: number | string; is_primary?: boolean | string },
+   ): Promise<ApiResponseDto<any>> {
+     if (!file) {
+       throw new BadRequestException('No file uploaded');
+     }
+     
+     // Additional validation: check file content (magic bytes)
+     // TODO: Implement magic byte validation
+     // TODO: Implement malware scanning (if service available)
+     
+     // Store in secure location (consider S3 for production)
+     const imageUrl = `/uploads/products/${file.filename}`;
+     
+     const image = await this.productService.uploadProductImage(
+       productId,
+       imageUrl,
+       body.display_order ? parseInt(body.display_order.toString(), 10) : undefined,
+       body.is_primary === true || body.is_primary === 'true',
+     );
+     
+     return new ApiResponseDto(image);
+   }
+   ```
+
+4. **Add Magic Byte Validation (Optional but Recommended)**
+   ```typescript
+   import { readFileSync } from 'fs';
+   
+   function validateImageFile(filePath: string): boolean {
+     const fileBuffer = readFileSync(filePath);
+     const magicBytes = fileBuffer.slice(0, 4);
+     
+     // JPEG: FF D8 FF E0
+     // PNG: 89 50 4E 47
+     // GIF: 47 49 46 38
+     // WebP: 52 49 46 46
+     const validSignatures = [
+       [0xFF, 0xD8, 0xFF, 0xE0], // JPEG
+       [0x89, 0x50, 0x4E, 0x47], // PNG
+       [0x47, 0x49, 0x46, 0x38], // GIF
+       [0x52, 0x49, 0x46, 0x46], // WebP
+     ];
+     
+     return validSignatures.some(signature => 
+       signature.every((byte, index) => byte === magicBytes[index])
+     );
+   }
+   ```
+
+#### Testing:
+- Test with valid image files
+- Test with invalid file types (should be rejected)
+- Test with files exceeding size limit (should be rejected)
+- Test path traversal attempts (should be blocked)
+- Test large files (DoS prevention)
+- Test authentication requirement
+
+---
+
 ## Priority 2: Medium Priority Fixes (Week 3)
 
 ### REC-009: Improve CORS Configuration
@@ -747,7 +889,7 @@ export function IsStrongPassword(validationOptions?: ValidationOptions) {
 - [ ] REC-001: Implement authentication/authorization
 - [ ] REC-002: Fix SQL injection
 - [ ] REC-003: Add security headers
-- [ ] REC-004: Fix file upload security
+- [ ] REC-004: Fix file upload security (NEW)
 
 ### Week 2 (High Priority)
 - [ ] REC-004: Move tokens to httpOnly cookies
@@ -813,6 +955,6 @@ After implementing each recommendation:
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** 2025-01-10
+**Document Version:** 1.1  
+**Last Updated:** 2025-01-12
 

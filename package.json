@@ -4,6 +4,7 @@
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@types/node": "^24.10.2",
     "dotenv": "^17.2.3",
     "ts-node": "^10.9.2",

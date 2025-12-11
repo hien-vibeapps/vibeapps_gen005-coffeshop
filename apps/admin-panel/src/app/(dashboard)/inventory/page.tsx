@@ -98,8 +98,21 @@ export default function InventoryPage() {
   const handleIngredientSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    
+    // Get shop_id from existing ingredient if editing, or from first ingredient if available
+    let shopId = editingIngredientData?.shop_id
+    if (!shopId && ingredients.length > 0) {
+      shopId = ingredients[0].shop_id
+    }
+    
+    // If still no shop_id, this is an error - should not happen in normal flow
+    if (!shopId) {
+      toast.error('Không tìm thấy shop_id. Vui lòng thử lại sau.')
+      return
+    }
+    
     const data = {
-      shop_id: 'default-shop-id', // TODO: Get from context/auth
+      shop_id: shopId,
       name: formData.get('name') as string,
       unit: formData.get('unit') as string,
       current_stock: parseFloat(formData.get('current_stock') as string) || 0,

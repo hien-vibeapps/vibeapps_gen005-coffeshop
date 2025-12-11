@@ -63,6 +63,19 @@ Tài liệu này mô tả tất cả các E2E test cases đã được viết ch
 - ✅ Display all order table headers
 - ✅ Show empty state when no orders
 
+#### Orders Statistics Tests (`tests/e2e/orders.spec.ts`)
+- ✅ Display statistics section
+- ✅ Display statistics metrics
+- ✅ Handle statistics API error gracefully
+- ✅ Verify statistics API call succeeds
+
+#### Orders API Tests (`tests/e2e/api/orders-api.spec.ts`)
+- ❌ **FAILED**: `GET /orders/statistics` returns 500 Internal Server Error
+- ✅ `GET /orders` returns 200 with orders list
+- ✅ `GET /orders` supports pagination parameters
+- ❌ **FAILED**: Statistics endpoint data structure validation (due to 500 error)
+- ❌ **FAILED**: Statistics endpoint error handling (returns 500 instead of proper error)
+
 ### 4. Tables Tests
 
 #### Basic Tables Tests (`tests/e2e/tables.spec.ts`)

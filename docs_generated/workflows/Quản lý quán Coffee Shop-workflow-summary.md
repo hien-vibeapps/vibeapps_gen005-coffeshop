@@ -2,7 +2,7 @@
 
 **Feature**: Quản lý quán Coffee Shop
 **Description**: 
-**Started**: 2025-12-10 22:09:22
+**Started**: 2025-12-11 10:33:37
 **Status**: In Progress
 
 **Workflow Range**: Step  → Step 
@@ -33,90 +33,54 @@ Workflow này thực hiện quy trình phát triển tính năng "Quản lý qu�
 ### Step 3 : Database Engineer - Design Schema
 
 - **Role**: database-engineer
-- **Status**: ⏳ In Progress
+- **Status**: ⏭️ Skipped (before start step)
 - **Description**: Thiết kế database schema và tạo migration scripts
-- **Output Directory**: D:\Prj\Vibe\VibeApps_Generate\vibeapps_gen-2\docs_generated\database-engineer
-- **Expected Output Files**: schema-*.md, **/migrations/*.ts
-- **Started**: 2025-12-10 22:09:22
-- **Completed**: TBD
-- **Notes**: 
-- **Prompt Used**: `Với vai trò database-engineer, hãy thực hiện: Thiết kế database schema và tạo migration scripts cho tính năng Quản lý quán Coffee Shop
-
-**QUAN TRỌNG:**
-- Nếu bạn tạo todo list, hãy thực hiện TẤT CẢ các tasks trong todo list đó, không chỉ dừng lại sau 1 task.
-- Tiếp tục thực hiện từng task một cho đến khi hoàn thành TẤT CẢ todos trong step này.
-- Chỉ chuyển sang step tiếp theo khi đã hoàn thành TẤT CẢ công việc trong step hiện tại.
-- Nếu có nhiều files cần tạo/sửa, hãy tạo/sửa TẤT CẢ, không chỉ 1 file rồi dừng lại.`
+- **Output**: N/A
 
 
 ### Step 4 : Frontend Developer - Implement UI
 
 - **Role**: frontend-developer
-- **Status**: ⏳ In Progress
+- **Status**: ⏭️ Skipped (before start step)
 - **Description**: Implement frontend (Next.js), tạo mock data services và định nghĩa API contracts
-- **Output Directory**: 
-- **Expected Output Files**: apps/admin-panel/**/*.tsx, apps/admin-panel/**/*.ts
-- **Started**: 2025-12-10 22:24:51
-- **Completed**: TBD
-- **Notes**: 
-- **Prompt Used**: `Với vai trò frontend-developer, hãy thực hiện: Implement frontend (Next.js), tạo mock data services và định nghĩa API contracts cho tính năng Quản lý quán Coffee Shop
-
-**QUAN TRỌNG:**
-- Nếu bạn tạo todo list, hãy thực hiện TẤT CẢ các tasks trong todo list đó, không chỉ dừng lại sau 1 task.
-- Tiếp tục thực hiện từng task một cho đến khi hoàn thành TẤT CẢ todos trong step này.
-- Chỉ chuyển sang step tiếp theo khi đã hoàn thành TẤT CẢ công việc trong step hiện tại.
-- Nếu có nhiều files cần tạo/sửa, hãy tạo/sửa TẤT CẢ, không chỉ 1 file rồi dừng lại.`
+- **Output**: N/A
 
 
 ### Step 5 : Backend Developer - Implement APIs
 
 - **Role**: backend-developer
-- **Status**: ⏳ In Progress
+- **Status**: ⏭️ Skipped (before start step)
 - **Description**: Implement backend (NestJS) theo API contracts từ Frontend Developer
-- **Output Directory**: 
-- **Expected Output Files**: services/**/*.ts
-- **Started**: 2025-12-10 22:40:13
-- **Completed**: TBD
-- **Notes**: 
-- **Prompt Used**: `Với vai trò backend-developer, hãy thực hiện: Implement backend (NestJS) theo API contracts từ Frontend Developer cho tính năng Quản lý quán Coffee Shop
-
-**QUAN TRỌNG:**
-- Nếu bạn tạo todo list, hãy thực hiện TẤT CẢ các tasks trong todo list đó, không chỉ dừng lại sau 1 task.
-- Tiếp tục thực hiện từng task một cho đến khi hoàn thành TẤT CẢ todos trong step này.
-- Chỉ chuyển sang step tiếp theo khi đã hoàn thành TẤT CẢ công việc trong step hiện tại.
-- Nếu có nhiều files cần tạo/sửa, hãy tạo/sửa TẤT CẢ, không chỉ 1 file rồi dừng lại.`
+- **Output**: N/A
 
 
 ### Step 6 : DevOps - Deploy
 
 - **Role**: devops
-- **Status**: ⏳ In Progress
+- **Status**: ⏭️ Skipped (before start step)
 - **Description**: Check Docker configs và docker compose up
-- **Output Directory**: 
-- **Expected Output Files**: deployment-*.md, docker-compose.yml, **/Dockerfile
-- **Started**: 2025-12-10 22:55:33
-- **Completed**: TBD
-- **Notes**: 
-- **Prompt Used**: `Với vai trò devops, hãy thực hiện: Check Docker configs và docker compose up cho tính năng Quản lý quán Coffee Shop
-
-**QUAN TRỌNG:**
-- Nếu bạn tạo todo list, hãy thực hiện TẤT CẢ các tasks trong todo list đó, không chỉ dừng lại sau 1 task.
-- Tiếp tục thực hiện từng task một cho đến khi hoàn thành TẤT CẢ todos trong step này.
-- Chỉ chuyển sang step tiếp theo khi đã hoàn thành TẤT CẢ công việc trong step hiện tại.
-- Nếu có nhiều files cần tạo/sửa, hãy tạo/sửa TẤT CẢ, không chỉ 1 file rồi dừng lại.`
+- **Output**: N/A
 
 
 ### Step 7 : Automation Tester - Write Tests
 
 - **Role**: automation-tester
-- **Status**: ⏳ In Progress
+- **Status**: ⏭️ Skipped (before start step)
 - **Description**: Viết Playwright E2E tests và chạy test reports
-- **Output Directory**: tests
-- **Expected Output Files**: e2e/*.e2e-spec.ts, reports/*.html
-- **Started**: 2025-12-10 23:10:51
+- **Output**: N/A
+
+
+### Step 8 : Self-Healing - Fix Bugs
+
+- **Role**: self-healing
+- **Status**: ⏳ In Progress
+- **Description**: Phân tích test results, tạo bug fix plan và tự động fix bugs
+- **Output Directory**: D:\Prj\Vibe\VibeApps_Generate\vibeapps_gen-2\docs_generated\self-healing
+- **Expected Output Files**: bug-analysis-*.md, bug-fix-plan-*.md, fixed-bugs-*.md
+- **Started**: 2025-12-11 10:33:38
 - **Completed**: TBD
 - **Notes**: 
-- **Prompt Used**: `Với vai trò automation-tester, hãy thực hiện: Viết Playwright E2E tests và chạy test reports cho tính năng Quản lý quán Coffee Shop
+- **Prompt Used**: `Với vai trò self-healing, hãy thực hiện: Phân tích test results, tạo bug fix plan và tự động fix bugs cho tính năng Quản lý quán Coffee Shop
 
 **QUAN TRỌNG:**
 - Nếu bạn tạo todo list, hãy thực hiện TẤT CẢ các tasks trong todo list đó, không chỉ dừng lại sau 1 task.
@@ -124,16 +88,15 @@ Workflow này thực hiện quy trình phát triển tính năng "Quản lý qu�
 - Chỉ chuyển sang step tiếp theo khi đã hoàn thành TẤT CẢ công việc trong step hiện tại.
 - Nếu có nhiều files cần tạo/sửa, hãy tạo/sửa TẤT CẢ, không chỉ 1 file rồi dừng lại.`
 
-- **Test Summary**: Không tìm thấy tests/reports/test-results.json để phân tích.
 
-### Step 8 : Security Tester - Security Audit
+### Step 9 : Security Tester - Security Audit
 
 - **Role**: security-tester
 - **Status**: ⏳ In Progress
 - **Description**: Security audit và kiểm tra OWASP Top 10
 - **Output Directory**: D:\Prj\Vibe\VibeApps_Generate\vibeapps_gen-2\docs_generated\security-tester
 - **Expected Output Files**: security-audit-*.md
-- **Started**: 2025-12-10 23:26:10
+- **Started**: 2025-12-11 10:49:14
 - **Completed**: TBD
 - **Notes**: 
 - **Prompt Used**: `Với vai trò security-tester, hãy thực hiện: Security audit và kiểm tra OWASP Top 10 cho tính năng Quản lý quán Coffee Shop
@@ -150,20 +113,16 @@ Workflow này thực hiện quy trình phát triển tính năng "Quản lý qu�
 ## Completion Summary
 
 **Feature**: Quản lý quán Coffee Shop
-**Started**: 2025-12-10 22:09:22
-**Completed**: 2025-12-10 23:41:44
-**Total Steps in Workflow**: 8
-**Steps in Range**: Step 3 → Step 8 (6 steps)
-**Completed Steps**: 6
-**Skipped Steps**: 2
+**Started**: 2025-12-11 10:33:37
+**Completed**: 2025-12-11 11:04:40
+**Total Steps in Workflow**: 9
+**Steps in Range**: Step 8 → Step 9 (2 steps)
+**Completed Steps**: 2
+**Skipped Steps**: 7
 
 ### Completed Steps
-- Step 3 : Database Engineer - Design Schema
-- Step 4 : Frontend Developer - Implement UI
-- Step 5 : Backend Developer - Implement APIs
-- Step 6 : DevOps - Deploy
-- Step 7 : Automation Tester - Write Tests
-- Step 8 : Security Tester - Security Audit
+- Step 8 : Self-Healing - Fix Bugs
+- Step 9 : Security Tester - Security Audit
 
 ### Deliverables
 - [ ] Product Owner: Epic/Feature documentation
@@ -172,6 +131,7 @@ Workflow này thực hiện quy trình phát triển tính năng "Quản lý qu�
 - [ ] Frontend Developer: Frontend code, mock data services, API contracts
 - [ ] Backend Developer: Backend APIs and external service integration
 - [ ] Automation Tester: E2E tests and reports
+- [ ] Self-Healing: Bug analysis, bug fix plan, and fixed bugs report
 - [ ] Security Tester: Security audit report
 - [ ] DevOps: Deployment documentation
 

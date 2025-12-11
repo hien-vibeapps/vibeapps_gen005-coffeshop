@@ -105,7 +105,11 @@ test.describe('Menu CRUD Operations', () => {
           })
           await menuPage.submitProductForm()
           
+          // Wait for success toast and then wait for products to reload
+          await menuPage.page.waitForTimeout(1500) // Wait for mutation to complete
           await menuPage.waitForProductsToLoad()
+          // Additional wait to ensure list is updated
+          await menuPage.page.waitForTimeout(500)
           
           const productNames = await menuPage.getProductNames()
           expect(productNames).toContain(productName)

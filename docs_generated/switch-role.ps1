@@ -3,7 +3,7 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet('product-owner', 'business-analyst', 'database-engineer', 'frontend-developer', 'backend-developer', 'automation-tester', 'security-tester', 'devops', 'orchestrator', 'list')]
+    [ValidateSet('product-owner', 'business-analyst', 'database-engineer', 'frontend-developer', 'backend-developer', 'automation-tester', 'self-healing', 'security-tester', 'devops', 'orchestrator', 'list')]
     [string]$Role
 )
 
@@ -20,6 +20,7 @@ $roles = @{
     'frontend-developer' = Join-Path $scriptDir '.cursorrules.frontend-developer'
     'backend-developer' = Join-Path $scriptDir '.cursorrules.backend-developer'
     'automation-tester' = Join-Path $scriptDir '.cursorrules.automation-tester'
+    'self-healing' = Join-Path $scriptDir '.cursorrules.self-healing'
     'security-tester' = Join-Path $scriptDir '.cursorrules.security-tester'
     'devops' = Join-Path $scriptDir '.cursorrules.devops'
     'orchestrator' = Join-Path $scriptDir '.cursorrules.orchestrator'

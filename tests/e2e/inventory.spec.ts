@@ -31,8 +31,8 @@ test.describe('Inventory Page', () => {
 
   test('should display ingredient table headers', async ({ page }) => {
     await expect(page.locator('text=Tên nguyên liệu')).toBeVisible()
-    await expect(page.locator('text=Đơn vị')).toBeVisible()
-    await expect(page.locator('text=Tồn kho')).toBeVisible()
+    await expect(page.getByRole('columnheader', { name: 'Đơn vị', exact: true })).toBeVisible()
+    await expect(page.getByRole('columnheader', { name: 'Tồn kho', exact: true })).toBeVisible()
     await expect(page.locator('text=Mức tối thiểu')).toBeVisible()
     await expect(page.locator('text=Giá đơn vị')).toBeVisible()
     await expect(page.locator('text=Trạng thái')).toBeVisible()

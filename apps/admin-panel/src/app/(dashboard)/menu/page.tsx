@@ -190,8 +190,22 @@ export default function MenuPage() {
   const handleCategorySubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    
+    // Get shop_id from existing category if editing, or from first category if available
+    const editingCategoryData = editingCategory ? categories.find((c) => c.id === editingCategory) : null
+    let shopId = editingCategoryData?.shop_id
+    if (!shopId && categories.length > 0) {
+      shopId = categories[0].shop_id
+    }
+    
+    // If still no shop_id, this is an error - should not happen in normal flow
+    if (!shopId) {
+      toast.error('Không tìm thấy shop_id. Vui lòng thử lại sau.')
+      return
+    }
+    
     const data = {
-      shop_id: 'default-shop-id', // TODO: Get from context/auth
+      shop_id: shopId,
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       display_order: parseInt(formData.get('display_order') as string) || 0,
@@ -208,8 +222,24 @@ export default function MenuPage() {
   const handleProductSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    
+    // Get shop_id from existing product if editing, or from first product if available, or from category
+    let shopId = editingProductData?.shop_id
+    if (!shopId && products.length > 0) {
+      shopId = products[0].shop_id
+    }
+    if (!shopId && categories.length > 0) {
+      shopId = categories[0].shop_id
+    }
+    
+    // If still no shop_id, this is an error - should not happen in normal flow
+    if (!shopId) {
+      toast.error('Không tìm thấy shop_id. Vui lòng thử lại sau.')
+      return
+    }
+    
     const data = {
-      shop_id: 'default-shop-id', // TODO: Get from context/auth
+      shop_id: shopId,
       category_id: formData.get('category_id') as string,
       name: formData.get('name') as string,
       description: formData.get('description') as string,

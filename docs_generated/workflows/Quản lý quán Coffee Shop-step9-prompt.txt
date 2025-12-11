@@ -1,4 +1,4 @@
-﻿Với vai trò self-healing, hãy thực hiện: Phân tích test results, tạo bug fix plan và tự động fix bugs cho tính năng Quản lý quán Coffee Shop
+﻿Với vai trò security-tester, hãy thực hiện: Security audit và kiểm tra OWASP Top 10 cho tính năng Quản lý quán Coffee Shop
 
 **QUAN TRỌNG:**
 - Nếu bạn tạo todo list, hãy thực hiện TẤT CẢ các tasks trong todo list đó, không chỉ dừng lại sau 1 task.

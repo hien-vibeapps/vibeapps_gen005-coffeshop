@@ -69,8 +69,12 @@ export class InventoryPage {
 
   async getIngredientStatus(ingredientName: string): Promise<string> {
     const row = this.ingredientsTableBody.locator('tr').filter({ hasText: ingredientName })
-    const statusBadge = row.locator('[class*="badge"]')
-    return await statusBadge.textContent() || ''
+    // Badge component không có class chứa "badge", tìm bằng text content trong cell chứa status
+    // Status là cột thứ 6 (sau Tên, Đơn vị, Tồn kho, Mức tối thiểu, Giá đơn vị)
+    const statusCell = row.locator('td').nth(5)
+    // Tìm text "Đủ hàng" hoặc "Sắp hết" trong cell
+    const badgeText = await statusCell.textContent()
+    return badgeText?.trim() || ''
   }
 
   async isLowStockAlertVisible(): Promise<boolean> {
@@ -89,13 +93,17 @@ export class InventoryPage {
 
   async clickEditIngredient(ingredientName: string) {
     const row = this.ingredientsTableBody.locator('tr').filter({ hasText: ingredientName })
-    await row.getByRole('button', { name: /Edit|Sửa/i }).first().click()
+    // Button chỉ có icon Edit, không có text. Tìm button đầu tiên trong actions cell
+    const actionsCell = row.locator('td').last()
+    await actionsCell.getByRole('button').first().click()
     await this.ingredientDialog.waitFor({ state: 'visible' })
   }
 
   async clickDeleteIngredient(ingredientName: string) {
     const row = this.ingredientsTableBody.locator('tr').filter({ hasText: ingredientName })
-    await row.getByRole('button', { name: /Trash|Xóa/i }).last().click()
+    // Button chỉ có icon Trash2, không có text. Tìm button thứ hai trong actions cell
+    const actionsCell = row.locator('td').last()
+    await actionsCell.getByRole('button').last().click()
   }
 
   async fillIngredientForm(data: {

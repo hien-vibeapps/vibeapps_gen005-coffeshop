@@ -96,8 +96,21 @@ export default function AreasPage() {
   const handleAreaSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    
+    // Get shop_id from existing area if editing, or from first area if available
+    let shopId = editingAreaData?.shop_id
+    if (!shopId && areas.length > 0) {
+      shopId = areas[0].shop_id
+    }
+    
+    // If still no shop_id, this is an error - should not happen in normal flow
+    if (!shopId) {
+      toast.error('Không tìm thấy shop_id. Vui lòng thử lại sau.')
+      return
+    }
+    
     const data = {
-      shop_id: 'default-shop-id', // TODO: Get from context/auth
+      shop_id: shopId,
       name: formData.get('name') as string,
       description: formData.get('description') as string,
       is_active: formData.get('is_active') === 'on',

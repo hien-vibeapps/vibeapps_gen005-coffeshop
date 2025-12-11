@@ -1,6 +1,6 @@
 # Security Audit Report - Coffee Shop Management System
 
-**Date:** 2025-12-10  
+**Date:** 2025-01-12  
 **Auditor:** Security Tester Agent  
 **Scope:** Coffee Shop Management API & Admin Panel  
 **Framework:** NestJS Backend, Next.js Frontend  
@@ -10,10 +10,10 @@
 
 ## Executive Summary
 
-This comprehensive security audit identified **16 critical and high-severity vulnerabilities** across the Coffee Shop Management System. The most critical issues are:
+This comprehensive security audit identified **17 critical and high-severity vulnerabilities** across the Coffee Shop Management System. The most critical issues are:
 
 1. **Complete absence of authentication and authorization** - All API endpoints are publicly accessible
-2. **SQL Injection vulnerability** in sort parameter
+2. **Widespread SQL Injection vulnerability** in sort parameter across 7 services
 3. **Missing security headers** - No helmet or security middleware
 4. **XSS risk** - JWT tokens stored in localStorage
 5. **No CSRF protection**
@@ -39,7 +39,8 @@ This comprehensive security audit identified **16 critical and high-severity vul
    - **Issue:** No `@UseGuards()` decorators found on any endpoints
    - **Impact:** All API endpoints are publicly accessible without authentication
    - **Evidence:**
-     ```12:25:services/coffee-shop-api/src/presentation/modules/product/product.controller.ts
+     ```23:36:services/coffee-shop-api/src/presentation/modules/product/product.controller.ts
+     @ApiTags('Products')
      @Controller('products')
      export class ProductController {
        constructor(private readonly productService: ProductService) {}
@@ -58,12 +59,13 @@ This comprehensive security audit identified **16 critical and high-severity vul
      - `ProductController` - 10 endpoints
      - `OrderController` - 7 endpoints
      - `CategoryController` - 5 endpoints
-     - `EmployeeController` - 5 endpoints
-     - `PaymentController` - 3 endpoints
-     - `InventoryController` - 5 endpoints
+     - `EmployeeController` - 7 endpoints (including permissions)
+     - `PaymentController` - 4 endpoints
+     - `InventoryController` - 8 endpoints
      - `ReportController` - 3 endpoints
      - `TableController` - 5 endpoints
      - `ShopController` - 2 endpoints
+     - **Total: 51 unprotected endpoints**
 
 2. **No Authorization Checks**
    - **Location:** All service methods
@@ -72,16 +74,17 @@ This comprehensive security audit identified **16 critical and high-severity vul
    - **Affected Endpoints:**
      - `/api/v1/products/*` - Create, update, delete products
      - `/api/v1/orders/*` - Create, update, cancel orders
-     - `/api/v1/payments/*` - Create payments
-     - `/api/v1/employees/*` - Manage employees
+     - `/api/v1/payments/*` - Create payments (financial operations)
+     - `/api/v1/employees/*` - Manage employees and permissions
      - `/api/v1/inventory/*` - Manage inventory
      - `/api/v1/reports/*` - Access sensitive reports
+     - `/api/v1/employees/:id/permissions` - Modify employee permissions
 
 3. **Insecure Direct Object References (IDOR)**
    - **Location:** All `GET /:id` endpoints
    - **Issue:** No checks to verify user has permission to access specific resources
    - **Example:**
-     ```31:36:services/coffee-shop-api/src/presentation/modules/order/order.controller.ts
+     ```39:44:services/coffee-shop-api/src/presentation/modules/order/order.controller.ts
      @Get(':id')
      @ApiOperation({ summary: 'Get order by ID' })
      async getOrder(@Param('id') id: string): Promise<ApiResponseDto<any>> {
@@ -89,7 +92,7 @@ This comprehensive security audit identified **16 critical and high-severity vul
        return new ApiResponseDto(order);
      }
      ```
-   - **Impact:** Users can access any resource by guessing IDs
+   - **Impact:** Users can access any resource by guessing IDs (orders, payments, employee data)
 
 #### Recommendations:
 - Implement JWT authentication guards
@@ -150,11 +153,18 @@ This comprehensive security audit identified **16 critical and high-severity vul
 
 #### Findings:
 
-1. **SQL Injection in Sort Parameter**
-   - **Location:** 
-     - `services/coffee-shop-api/src/presentation/modules/product/product.service.ts:53-54`
+1. **SQL Injection in Sort Parameter - WIDESPREAD**
+   - **Location:** Multiple services using `sort` parameter without validation
    - **Issue:** User-controlled `sort` parameter is directly interpolated into SQL query without validation
-   - **Vulnerable Code:**
+   - **Vulnerable Services:**
+     - `ProductService` - Line 53-54
+     - `CategoryService` - Line 27-28
+     - `OrderService` - Line 93-94
+     - `TableService` - Lines 40-41 (areas), 103-104 (tables), 335-336 (reservations)
+     - `InventoryService` - Line 38-39
+     - `PaymentService` - Line 46-47
+     - `EmployeeService` - Line 46-47
+   - **Vulnerable Code Examples:**
      ```53:57:services/coffee-shop-api/src/presentation/modules/product/product.service.ts
      if (sort) {
        queryBuilder.orderBy(`product.${sort}`, order.toUpperCase() as 'ASC' | 'DESC');
@@ -162,18 +172,35 @@ This comprehensive security audit identified **16 critical and high-severity vul
        queryBuilder.orderBy('product.display_order', 'ASC').addOrderBy('product.created_at', 'DESC');
      }
      ```
+     ```27:31:services/coffee-shop-api/src/presentation/modules/category/category.service.ts
+     if (sort) {
+       queryBuilder.orderBy(`category.${sort}`, order.toUpperCase() as 'ASC' | 'DESC');
+     } else {
+       queryBuilder.orderBy('category.created_at', 'DESC');
+     }
+     ```
+     ```93:97:services/coffee-shop-api/src/presentation/modules/order/order.service.ts
+     if (sort) {
+       queryBuilder.orderBy(`order.${sort}`, order.toUpperCase() as 'ASC' | 'DESC');
+     } else {
+       queryBuilder.orderBy('order.created_at', 'DESC');
+     }
+     ```
    - **Vulnerability:** `sort` is a string from `PaginationDto` with no validation
    - **DTO Definition:**
      ```25:27:services/coffee-shop-api/src/common/dto/pagination.dto.ts
+     @ApiPropertyOptional()
      @IsOptional()
      sort?: string;
      ```
    - **Attack Example:**
      ```bash
      GET /api/v1/products?sort=name; DROP TABLE products;--
-     GET /api/v1/products?sort=name UNION SELECT password FROM users--
+     GET /api/v1/orders?sort=created_at UNION SELECT password FROM users--
+     GET /api/v1/payments?sort=amount; DELETE FROM payments WHERE 1=1--
      ```
-   - **Impact:** Attacker can execute arbitrary SQL commands
+   - **Impact:** Attacker can execute arbitrary SQL commands on all affected endpoints
+   - **Severity:** CRITICAL - Affects 7 services, 20+ endpoints
 
 2. **TypeORM Parameterized Queries (Good)**
    - **Location:** Most service methods
@@ -192,10 +219,11 @@ This comprehensive security audit identified **16 critical and high-severity vul
    - **Impact:** Potential for NoSQL injection if MongoDB used in future
 
 #### Recommendations:
-- **IMMEDIATE:** Whitelist allowed sort columns
+- **IMMEDIATE:** Whitelist allowed sort columns for each service
 - Validate sort parameter against allowed column names
 - Use enum or validation decorator for sort field
 - Implement input sanitization for all user inputs
+- Create a base service class with secure sort handling
 
 ---
 
@@ -274,7 +302,7 @@ This comprehensive security audit identified **16 critical and high-severity vul
    - **Impact:** Potential for CORS-based attacks if misconfigured
 
 3. **Database Synchronize Enabled**
-   - **Location:** `services/coffee-shop-api/src/app.module.ts:60`
+   - **Location:** `services/coffee-shop-api/src/app.module.ts:62`
    - **Issue:** `synchronize: process.env.NODE_ENV !== 'production'`
    - **Impact:** In development, schema changes auto-applied (could cause data loss)
 
@@ -314,8 +342,8 @@ This comprehensive security audit identified **16 critical and high-severity vul
      async uploadProductImage(
        @Param('id') productId: string,
        @UploadedFile() file: Express.Multer.File,
-       @Body() body: { display_order?: number; is_primary?: boolean },
-     ): Promise<ApiResponseDto<any>> {
+       @Body() body: { display_order?: number | string; is_primary?: boolean | string },
+       ): Promise<ApiResponseDto<any>> {
        // TODO: Implement actual file upload to storage (S3, local, etc.)
        // For now, we'll use a placeholder URL
        const imageUrl = file ? `/uploads/products/${file.filename}` : body['image_url'] || '';
@@ -521,12 +549,12 @@ This comprehensive security audit identified **16 critical and high-severity vul
 
 | Check | Status | Notes |
 |-------|--------|-------|
-| SQL Injection prevention | ⚠️ **PARTIAL** | Parameterized queries used, but sort parameter vulnerable |
+| SQL Injection prevention | ❌ **FAIL** | Widespread SQL injection in sort parameter (7 services) |
 | XSS prevention | ⚠️ **PARTIAL** | React protects, but no CSP headers |
 | CSRF protection | ❌ **FAIL** | No CSRF protection |
 | Authentication secure | ❌ **FAIL** | No authentication implemented |
 | Authorization checks | ❌ **FAIL** | No authorization checks |
-| Input validation | ✅ **PASS** | DTOs use class-validator |
+| Input validation | ⚠️ **PARTIAL** | DTOs use class-validator, but sort parameter not validated |
 | HTTPS enabled | ⚠️ **UNKNOWN** | Not enforced in code |
 | Security headers | ❌ **FAIL** | No security headers |
 | Sensitive data encrypted | ⚠️ **UNKNOWN** | No encryption at rest |
@@ -546,10 +574,11 @@ This comprehensive security audit identified **16 critical and high-severity vul
    - **Exploitability:** Trivial
    - **Impact:** Complete system compromise
 
-2. **SQL Injection in Sort Parameter**
+2. **SQL Injection in Sort Parameter (Widespread)**
    - **CVSS Score:** 9.8 (Critical)
    - **Exploitability:** Easy
    - **Impact:** Database compromise, data theft
+   - **Affected:** 7 services, 20+ endpoints
 
 3. **Missing Security Headers**
    - **CVSS Score:** 7.5 (High)
@@ -585,7 +614,7 @@ This comprehensive security audit identified **16 critical and high-severity vul
 ### Priority 0 - Immediate (Before Production)
 
 1. ✅ Implement JWT authentication with guards
-2. ✅ Fix SQL injection in sort parameter
+2. ✅ Fix SQL injection in sort parameter (all 7 services)
 3. ✅ Add security headers (helmet.js)
 4. ✅ Implement rate limiting
 5. ✅ Add authorization checks (RBAC)
@@ -612,11 +641,16 @@ This comprehensive security audit identified **16 critical and high-severity vul
 
 ## Conclusion
 
-The Coffee Shop Management System has **critical security vulnerabilities** that make it unsuitable for production deployment. The most urgent issues are the complete absence of authentication/authorization, the SQL injection vulnerability, missing security headers, and file upload security issues.
+The Coffee Shop Management System has **critical security vulnerabilities** that make it unsuitable for production deployment. The most urgent issues are:
+
+1. **Complete absence of authentication/authorization** - 51 endpoints unprotected
+2. **Widespread SQL injection vulnerability** - Affects 7 services, 20+ endpoints
+3. **Missing security headers** - No protection against XSS, clickjacking
+4. **File upload security issues** - No validation
 
 **Immediate action required** before any production deployment:
 - Implement authentication and authorization
-- Fix SQL injection vulnerability
+- Fix SQL injection vulnerabilities in all affected services
 - Add security headers
 - Implement rate limiting
 - Fix file upload security
@@ -650,5 +684,5 @@ The Coffee Shop Management System has **critical security vulnerabilities** that
 
 ---
 
-**Report Generated:** 2025-12-10  
+**Report Generated:** 2025-01-12  
 **Next Review:** After critical fixes implemented

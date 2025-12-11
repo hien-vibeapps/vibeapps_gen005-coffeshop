@@ -90,12 +90,12 @@ test.describe('Orders CRUD Operations', () => {
 
   test.describe('Order List', () => {
     test('should display all order table headers', async ({ page }) => {
-      await expect(page.locator('text=Số đơn')).toBeVisible()
-      await expect(page.locator('text=Bàn')).toBeVisible()
-      await expect(page.locator('text=Loại')).toBeVisible()
-      await expect(page.locator('text=Tổng tiền')).toBeVisible()
-      await expect(page.locator('text=Trạng thái')).toBeVisible()
-      await expect(page.locator('text=Thời gian')).toBeVisible()
+      await expect(page.getByRole('columnheader', { name: 'Số đơn', exact: true })).toBeVisible()
+      await expect(page.getByRole('columnheader', { name: 'Bàn', exact: true })).toBeVisible()
+      await expect(page.getByRole('columnheader', { name: 'Loại', exact: true })).toBeVisible()
+      await expect(page.getByRole('columnheader', { name: 'Tổng tiền', exact: true })).toBeVisible()
+      await expect(page.getByRole('columnheader', { name: 'Trạng thái', exact: true })).toBeVisible()
+      await expect(page.getByRole('columnheader', { name: 'Thời gian', exact: true })).toBeVisible()
     })
 
     test('should show empty state when no orders', async ({ page }) => {

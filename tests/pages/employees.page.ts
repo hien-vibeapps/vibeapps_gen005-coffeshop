@@ -63,14 +63,18 @@ export class EmployeesPage {
 
   async getEmployeeRole(employeeName: string): Promise<string> {
     const row = this.employeesTableBody.locator('tr').filter({ hasText: employeeName })
-    const roleBadge = row.locator('[class*="badge"]').first()
-    return await roleBadge.textContent() || ''
+    // Role badge là cột thứ 4 (sau Tên, Email, Phone)
+    const roleCell = row.locator('td').nth(3)
+    const badgeText = await roleCell.textContent()
+    return badgeText?.trim() || ''
   }
 
   async getEmployeeStatus(employeeName: string): Promise<string> {
     const row = this.employeesTableBody.locator('tr').filter({ hasText: employeeName })
-    const statusBadge = row.locator('[class*="badge"]').last()
-    return await statusBadge.textContent() || ''
+    // Status badge là cột thứ 5 (sau Role)
+    const statusCell = row.locator('td').nth(4)
+    const badgeText = await statusCell.textContent()
+    return badgeText?.trim() || ''
   }
 
   async waitForEmployeesToLoad() {
@@ -85,13 +89,17 @@ export class EmployeesPage {
 
   async clickEditEmployee(employeeName: string) {
     const row = this.employeesTableBody.locator('tr').filter({ hasText: employeeName })
-    await row.getByRole('button', { name: /Edit|Sửa/i }).first().click()
+    // Button chỉ có icon Edit, không có text. Tìm button đầu tiên trong actions cell
+    const actionsCell = row.locator('td').last()
+    await actionsCell.getByRole('button').first().click()
     await this.employeeDialog.waitFor({ state: 'visible' })
   }
 
   async clickDeleteEmployee(employeeName: string) {
     const row = this.employeesTableBody.locator('tr').filter({ hasText: employeeName })
-    await row.getByRole('button', { name: /Trash|Xóa/i }).last().click()
+    // Button chỉ có icon Trash2, không có text. Tìm button thứ hai trong actions cell
+    const actionsCell = row.locator('td').last()
+    await actionsCell.getByRole('button').last().click()
   }
 
   async fillEmployeeForm(data: {
