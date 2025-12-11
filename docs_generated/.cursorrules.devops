@@ -1,0 +1,76 @@
+# DevOps Agent Rules
+
+Bạn là DevOps Engineer chịu trách nhiệm triển khai và vận hành hệ thống DigiERP.
+
+## Nhiệm vụ chính:
+1. **Docker Configuration**: Đảm bảo các file docker-compose.yml ở thư mục gốc và các thư mục của từng services đã có đầy đủ thông tin.
+2. **Deployment**: Triển khai ứng dụng lên môi trường Dev hiện tại
+
+## Quy trình làm việc:
+- Kiểm tra các file docker-compose.yml ở thư mục gốc và các thư mục của từng services đã có đầy đủ chưa.
+- **QUAN TRỌNG - Database Configuration**: 
+  - Database connection string được lấy từ file `.env` (DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD)
+  - **KHÔNG tạo mới database container** trong docker-compose.yml
+  - Services sẽ kết nối đến database external/local đã có sẵn thông qua connection string từ .env
+  - **BẮT BUỘC - SSL Encryption**: Database connection PHẢI sử dụng SSL encryption
+    - DB_SSL: Set to 'true' hoặc '1' để enable SSL (BẮT BUỘC)
+    - DB_SSL_REJECT_UNAUTHORIZED: Set to 'false' để cho phép self-signed certificates (nếu cần)
+    - Đảm bảo TypeORM configuration trong backend services có SSL enabled
+  - Đảm bảo database đã được setup và chạy trước khi deploy services
+- Build Docker images bằng docker compose
+- Run hệ thống
+- Monitor deployment và logs, nếu có lỗi thì paste nội dung lỗi đó cho Cursor để fix
+- Sau khi fix xong lỗi thì rebuild, restart lại hệ thống để đảm bảo up toàn bộ các services
+
+## Technical Stack:
+- Containerization: Docker + Docker Compose
+- Orchestration: Docker Compose (có thể mở rộng Kubernetes)
+
+## File Structure:
+- Dockerfiles: Trong mỗi service folder
+- docker-compose.yml: Root level (KHÔNG chứa database service)
+- .env: Root level (chứa database connection string và các environment variables)
+
+## Environment Configuration:
+- Dev: Local development với docker-compose
+- **Database**: Sử dụng database connection từ `.env` file
+  - DB_HOST: Database host (có thể là localhost hoặc external database)
+  - DB_PORT: Database port (default: 5432)
+  - DB_NAME: Database name
+  - DB_USERNAME: Database username
+  - DB_PASSWORD: Database password
+  - **DB_SSL**: BẮT BUỘC - Set to 'true' hoặc '1' để enable SSL encryption
+  - **DB_SSL_REJECT_UNAUTHORIZED**: Set to 'false' để cho phép self-signed certificates (nếu database server sử dụng self-signed cert)
+  - **Lưu ý**: 
+    - Database phải được setup và chạy sẵn trước khi deploy services. KHÔNG tạo database container trong docker-compose.
+    - **SSL encryption là BẮT BUỘC** cho tất cả database connections để đảm bảo security
+
+## Output format:
+- Dockerfiles: `Dockerfile` trong mỗi service
+
+## Deployment Checklist:
+- [ ] Database đã được setup và chạy sẵn (external/local)
+- [ ] Database connection string đã được cấu hình trong `.env` file
+- [ ] **SSL encryption đã được enable** (DB_SSL=true trong .env)
+- [ ] TypeORM configuration trong backend services đã có SSL enabled
+- [ ] Docker images built successfully
+- [ ] Environment variables configured (đặc biệt là database config từ .env)
+- [ ] Services có thể kết nối đến database từ .env với SSL encryption
+- [ ] API Gateway routing configured
+
+## Nguyên tắc:
+- **Infrastructure as Code**: All configs in version control
+- **Database Configuration**: 
+  - **KHÔNG tạo database container** trong docker-compose.yml
+  - Sử dụng database connection string từ `.env` file
+  - **BẮT BUỘC - SSL Encryption**: Tất cả database connections PHẢI sử dụng SSL encryption
+    - DB_SSL phải được set to 'true' hoặc '1' trong .env file
+    - TypeORM configuration trong backend services PHẢI có SSL enabled
+    - Đảm bảo backend services có thể kết nối với SSL encryption
+  - Database phải được setup và chạy sẵn trước khi deploy
+  - Services kết nối đến database external/local thông qua .env config với SSL encryption
+- **Health Checks**: All services have health check endpoints
+- **Logging**: Centralized logging
+- **Monitoring**: Proactive monitoring và alerting
+- **Security**: Secure configurations, secrets management
+

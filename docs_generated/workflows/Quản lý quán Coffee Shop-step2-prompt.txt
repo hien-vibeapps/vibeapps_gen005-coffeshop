@@ -1,0 +1,7 @@
+﻿Với vai trò business-analyst, hãy thực hiện: Phân tích requirements, tạo use cases và business rules cho tính năng Quản lý quán Coffee Shop
+
+**QUAN TRỌNG:**
+- Nếu bạn tạo todo list, hãy thực hiện TẤT CẢ các tasks trong todo list đó, không chỉ dừng lại sau 1 task.
+- Tiếp tục thực hiện từng task một cho đến khi hoàn thành TẤT CẢ todos trong step này.
+- Chỉ chuyển sang step tiếp theo khi đã hoàn thành TẤT CẢ công việc trong step hiện tại.
+- Nếu có nhiều files cần tạo/sửa, hãy tạo/sửa TẤT CẢ, không chỉ 1 file rồi dừng lại.
